@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
 import 'local_source.dart';
@@ -109,11 +110,12 @@ class LocationData {
   }
 }
 
-class AllProfileDetails {
+class UserProfileDetails with ChangeNotifier {
   ProfileDetails? profile;
   Future<void> loadProfile() async {
     final LocalSource localSource = LocalSource();
     profile = await localSource.loadProfile();
+    notifyListeners();
   }
 
   Future<void> insertProfile(ProfileDetails NewProfile) async {

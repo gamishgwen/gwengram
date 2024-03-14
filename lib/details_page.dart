@@ -15,7 +15,7 @@ import 'map_page.dart';
 class DetailsPage extends StatefulWidget {
   final ProfileDetails? profile;
   final LocationData? locationData;
-  final AllProfileDetails? allprofile;
+  final UserProfileDetails? allprofile;
 
   const DetailsPage({super.key, this.profile, this.locationData, this.allprofile});
 
@@ -54,7 +54,7 @@ class _DetailsPageState extends State<DetailsPage> {
               longitude: _locationData!.longitude));
 
 
-  await AllProfileDetails().insertProfile(profileDetails);
+  await UserProfileDetails().insertProfile(profileDetails);
      await ProfileSource().postProfile(profileDetails);
     }
   }
