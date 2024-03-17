@@ -6,8 +6,6 @@ import 'package:sqflite/sqflite.dart'as sql;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as syspath;
 
-import 'local_source.dart';
-
 class PostLocalSource{
   final String _tableName = 'post_details';
   Future<sql.Database> initiatePostDB() async {
@@ -40,7 +38,7 @@ class PostLocalSource{
     final sql.Database db = await initiatePostDB();
     final List<Map<String, dynamic>> rawPost= await db.query(_tableName);
     final List<PostDetails> post = rawPost
-        .map((e) => PostDetails(userId: (e['userId'] ?? ''),
+        .map((e) => PostDetails(id: e['id'],userId: (e['userId'] ?? ''),
        file: File(e['image']),
        location:  LocationData(
             latitude: e['lat'],
@@ -49,6 +47,17 @@ class PostLocalSource{
         ),description: e['description']))
         .toList();
     return post;
+  }
+
+  Future<void>delete(String id) async{
+    print(id);
+    final posts =await loadPost();
+    print(posts);
+    final sql.Database db= await  initiatePostDB();
+    final int dbRow = await db.delete(_tableName,where:'id=?',whereArgs: [id]);
+
+    
+
   }
   Future<File> copyFileToLocalAppDir(File file) async {
     final Directory appDir = await syspath.getApplicationDocumentsDirectory();

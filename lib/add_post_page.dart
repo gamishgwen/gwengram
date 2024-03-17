@@ -9,6 +9,9 @@ import 'package:gwengram/post_remote_source.dart';
 import 'package:gwengram/profile_details.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart' as sql;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as syspath;
 
 import 'location_source.dart';
 import 'map_page.dart';
@@ -26,7 +29,6 @@ class _AddNewPostState extends State<AddNewPost> {
   LocationData? _locationData;
   File? chosenImageFile;
 
-
   void myLocation(double latitude, double longitude) async {
     String address =
         await LocationSource().getAddressFromLatLong(latitude, longitude);
@@ -36,22 +38,27 @@ class _AddNewPostState extends State<AddNewPost> {
     });
   }
 
-  void save() async{
+  void save() async {
     if (chosenImageFile != null && _locationData != null) {
-      final PostDetails postDetails = PostDetails(userId:context.read<UserProfileDetails>().profile!.id ,
-          file: chosenImageFile!,
+      final copiedImage = await copyFileToLocalAppDir(chosenImageFile!);
+      final PostDetails postDetails = PostDetails(
+          userId: context.read<UserProfileDetails>().profile!.id,
+          file: copiedImage,
           location: LocationData(
               address: _locationData!.address,
               latitude: _locationData!.latitude,
               longitude: _locationData!.longitude),
           description: postDescriptionController.text);
 
-
-      await UserPostDetails().insertPost(postDetails);
-      await PostRemoteSource().postPost(postDetails);
-
-
+      await context.read<UserPostDetails>().insertPost(postDetails);
     }
+  }
+
+  Future<File> copyFileToLocalAppDir(File file) async {
+    final Directory appDir = await syspath.getApplicationDocumentsDirectory();
+    final String fileName = path.basename(file.path);
+    final File copiedFile = await file.copy(path.join(appDir.path, fileName));
+    return copiedFile;
   }
 
   void imageset() async {
@@ -69,7 +76,9 @@ class _AddNewPostState extends State<AddNewPost> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
           icon: Icon(Icons.arrow_back),
         ),
         title: Text('Add Post'),
@@ -77,15 +86,19 @@ class _AddNewPostState extends State<AddNewPost> {
       body: ListenableBuilder(
         listenable: context.read<UserProfileDetails>(),
         builder: (BuildContext context, Widget? child) {
-          if(context.read<UserProfileDetails>().profile==null){
-            return Center(child: CircularProgressIndicator(),);
-
+          if (context.read<UserProfileDetails>().profile == null) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
           return ListView(
             children: [
               Row(
                 children: [
-                  CircleAvatar(backgroundImage: FileImage(context.read<UserProfileDetails>().profile!.file),),
+                  CircleAvatar(
+                    backgroundImage: FileImage(
+                        context.read<UserProfileDetails>().profile!.file),
+                  ),
                   SizedBox(
                     width: 16,
                   ),

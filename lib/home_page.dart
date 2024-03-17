@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gwengram/add_post_page.dart';
 import 'package:gwengram/post_details.dart';
+
 import 'package:gwengram/profile_details.dart';
 import 'package:provider/provider.dart';
 
@@ -33,19 +34,46 @@ class HomePage extends StatelessWidget {
               builder: (BuildContext context, child) => ListView.builder(
                 itemCount: context.read<UserPostDetails>().postDetails.length,
                 itemBuilder: (BuildContext context, index) => Column(
-                  children: [SizedBox(height: 8,),
+                  children: [
+                    SizedBox(
+                      height: 8,
+                    ),
                     Row(
                       children: [
-                        CircleAvatar(backgroundImage:FileImage(context.read<UserProfileDetails>().profile!.file)),
+                        CircleAvatar(
+                            backgroundImage: FileImage(context
+                                .read<UserProfileDetails>()
+                                .profile!
+                                .file)),
                         SizedBox(
                           width: 8,
                         ),
-                        Column(crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(context.read<UserProfileDetails>().profile!.userName),
-                            Text(context.read<UserPostDetails>().postDetails[index].location.address),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${context.read<UserProfileDetails>().profile!.userName}',
+                              ),
+                              Text(
+                                context
+                                    .read<UserPostDetails>()
+                                    .postDetails[index]
+                                    .location
+                                    .address,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
+                        IconButton(
+                            alignment: Alignment.topRight,
+                            onPressed: () async {
+
+                              await context.read<UserPostDetails>().remove(context.read<UserPostDetails>().postDetails[index].id);
+                            },
+                            icon: Icon(Icons.delete)),
                       ],
                     ),
                     SizedBox(
@@ -54,11 +82,27 @@ class HomePage extends StatelessWidget {
                     Container(
                       height: 200,
                       width: double.infinity,
-                      child: AspectRatio(aspectRatio: 1,child: Image.file(fit: BoxFit.cover,alignment: Alignment.topCenter,context.read<UserPostDetails>().postDetails[index].file,),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.file(
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                          context
+                              .read<UserPostDetails>()
+                              .postDetails[index]
+                              .file,
+                        ),
                       ),
-                    ),SizedBox(height: 8,),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
                     Align(
-                        alignment: Alignment.topLeft, child: Text(context.read<UserPostDetails>().postDetails[index].description))
+                        alignment: Alignment.topLeft,
+                        child: Text(context
+                            .read<UserPostDetails>()
+                            .postDetails[index]
+                            .description))
                   ],
                 ),
               ),
