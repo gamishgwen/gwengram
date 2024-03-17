@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gwengram/add_post_page.dart';
+import 'package:gwengram/custom_carousel.dart';
 import 'package:gwengram/post_details.dart';
 
 import 'package:gwengram/profile_details.dart';
@@ -70,8 +71,11 @@ class HomePage extends StatelessWidget {
                         IconButton(
                             alignment: Alignment.topRight,
                             onPressed: () async {
-
-                              await context.read<UserPostDetails>().remove(context.read<UserPostDetails>().postDetails[index].id);
+                              await context.read<UserPostDetails>().remove(
+                                  context
+                                      .read<UserPostDetails>()
+                                      .postDetails[index]
+                                      .id);
                             },
                             icon: Icon(Icons.delete)),
                       ],
@@ -84,19 +88,15 @@ class HomePage extends StatelessWidget {
                       width: double.infinity,
                       child: AspectRatio(
                         aspectRatio: 1,
-                        child: Image.file(
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          context
+                        child: Carousel(
+                          imageFileList: context
                               .read<UserPostDetails>()
                               .postDetails[index]
-                              .file,
+                              .images,
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 8,
-                    ),
+                    SizedBox(height: 8),
                     Align(
                         alignment: Alignment.topLeft,
                         child: Text(context

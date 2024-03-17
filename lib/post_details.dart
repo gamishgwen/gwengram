@@ -9,14 +9,14 @@ import 'package:uuid/uuid.dart';
 
 class PostDetails {
   late final String id;
-  final File file;
+  final List<File> images;
   final LocationData location;
   final String description;
   final String userId;
 
   PostDetails(
       {required this.userId,
-      required this.file,
+      required this.images,
       required this.location,
       required this.description,
       String? id})
@@ -26,7 +26,7 @@ class PostDetails {
     return PostDetails(
         id: id,
         userId: (map['userId'] ?? ''),
-        file: File(map['image']),
+        images: (map['images'] as List).map((e) => File(e)).toList(),
         location: LocationData(
             latitude: map['lat'],
             longitude: map['lng'],
@@ -36,7 +36,7 @@ class PostDetails {
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
-      'image': file.path,
+      'images': images.map((e) => e.path).toList(),
       'lat': location.latitude,
       'lng': location.longitude,
       'address': location.address,
@@ -46,7 +46,7 @@ class PostDetails {
 
   @override
   String toString() {
-    return 'PostDetails{id: $id, file: $file, location: $location, description: $description, userId: $userId}';
+    return 'PostDetails{id: $id, images: $images, location: $location, description: $description, userId: $userId}';
   }
 }
 

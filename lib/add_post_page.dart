@@ -1,15 +1,12 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gwengram/post_details.dart';
-import 'package:gwengram/post_local_source.dart';
-import 'package:gwengram/post_remote_source.dart';
 import 'package:gwengram/profile_details.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as syspath;
 
@@ -17,7 +14,9 @@ import 'location_source.dart';
 import 'map_page.dart';
 
 class AddNewPost extends StatefulWidget {
-  const AddNewPost({super.key});
+  const AddNewPost({
+    super.key,
+  });
 
   @override
   State<AddNewPost> createState() => _AddNewPostState();
@@ -27,7 +26,20 @@ class _AddNewPostState extends State<AddNewPost> {
   final TextEditingController postDescriptionController =
       TextEditingController();
   LocationData? _locationData;
-  File? chosenImageFile;
+  List<File> imageFileList = [];
+  final ImagePicker imagePicker = ImagePicker();
+
+  void selectImages() async {
+    final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+    print("Image List Length:" + imageFileList.length.toString());
+    if (selectedImages != null) {
+      setState(() {
+        for (int i = 0; i < selectedImages.length; i++) {
+          imageFileList.add(File(selectedImages[i].path));
+        }
+      });
+    }
+  }
 
   void myLocation(double latitude, double longitude) async {
     String address =
@@ -39,11 +51,10 @@ class _AddNewPostState extends State<AddNewPost> {
   }
 
   void save() async {
-    if (chosenImageFile != null && _locationData != null) {
-      final copiedImage = await copyFileToLocalAppDir(chosenImageFile!);
+    if (imageFileList != null && _locationData != null) {
       final PostDetails postDetails = PostDetails(
           userId: context.read<UserProfileDetails>().profile!.id,
-          file: copiedImage,
+          images: imageFileList,
           location: LocationData(
               address: _locationData!.address,
               latitude: _locationData!.latitude,
@@ -59,16 +70,6 @@ class _AddNewPostState extends State<AddNewPost> {
     final String fileName = path.basename(file.path);
     final File copiedFile = await file.copy(path.join(appDir.path, fileName));
     return copiedFile;
-  }
-
-  void imageset() async {
-    final XFile? image =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        chosenImageFile = File(image.path);
-      });
-    }
   }
 
   @override
@@ -111,34 +112,32 @@ class _AddNewPostState extends State<AddNewPost> {
         },
         child: Column(
           children: [
-            GestureDetector(
-              onTap: imageset,
-              child: Container(
-                decoration: BoxDecoration(
-                    image: chosenImageFile != null
-                        ? DecorationImage(
-                            image: FileImage(chosenImageFile!),
-                            fit: BoxFit.cover,
-                            alignment: Alignment.topCenter)
-                        : null,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white30)),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Center(
-                    child: chosenImageFile == null
-                        ? ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: Icon(Icons.camera),
-                            label: Text('Add Image'))
-                        : null,
-                  ),
-                ),
+            ElevatedButton(
+              onPressed: () {
+                selectImages();
+              },
+              child: Text('Select Images'),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CarouselSlider(
+                items: [
+                  for (int i = 0; i < imageFileList.length; i++)
+                    AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.file(
+                          File(imageFileList[i].path),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ))
+                ],
+                options: CarouselOptions(
+                    aspectRatio: 1,
+                    viewportFraction: 1,
+                    enableInfiniteScroll: false),
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             Container(
               height: 200,
               width: double.infinity,

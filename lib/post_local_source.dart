@@ -11,9 +11,9 @@ class PostLocalSource{
   Future<sql.Database> initiatePostDB() async {
     final String dbPath = await sql.getDatabasesPath();
     final sql.Database db = await sql
-        .openDatabase(path.join(dbPath, 'post_db.db'), onCreate: (db, version) async {
+        .openDatabase(path.join(dbPath, 'posts.db'), onCreate: (db, version) async {
       return await db.execute(
-          'CREATE TABLE $_tableName(id Text PRIMARY KEY, userId TEXT,image TEXT, lat REAL, lng REAL, address TEXT, description TEXT)');
+          'CREATE TABLE $_tableName(id Text PRIMARY KEY, userId TEXT,images TEXT, lat REAL, lng REAL, address TEXT, description TEXT)');
     }, version: 1);
     return db;
   }
@@ -23,15 +23,13 @@ class PostLocalSource{
     final sql.Database db = await initiatePostDB();
     final int dbRow = await db.insert(_tableName, {
       'id': postDetails.id,
-      'image': postDetails.file.path,
+      'images': postDetails.images.fold<String>('', (previousValue, element) => '$previousValue,$element'),
       'lat': postDetails.location.latitude,
       'lng': postDetails.location.longitude,
       'address': postDetails.location.address,
       'description': postDetails.description,
       'userId': postDetails.userId
     });
-
-
   }
 
   Future<List<PostDetails>> loadPost() async {
@@ -39,7 +37,7 @@ class PostLocalSource{
     final List<Map<String, dynamic>> rawPost= await db.query(_tableName);
     final List<PostDetails> post = rawPost
         .map((e) => PostDetails(id: e['id'],userId: (e['userId'] ?? ''),
-       file: File(e['image']),
+       images: (e['images'] as String).split(',').map((e) => File(e)).toList(),
        location:  LocationData(
             latitude: e['lat'],
             longitude: e['lng'],
