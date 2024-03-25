@@ -23,6 +23,16 @@ class PostRemoteSource {
     final http.Response response = await http.put(url,
         headers: {'content-type': 'application/json'},
         body: jsonEncode(postDetails.toJson()));
+
+
+  }
+  Future<void> updatePost(PostDetails postDetails) async{
+    final url = Uri.https(
+        'gwengram-3f74b-default-rtdb.europe-west1.firebasedatabase.app', 'posts/${postDetails.id}.json');
+
+    final http.Response response = await http.patch(url,
+        headers: {'content-type': 'application/json'},
+        body: jsonEncode(postDetails.toJson()));
   }
 
   Future<void> remove(String id) async {

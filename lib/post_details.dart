@@ -19,6 +19,7 @@ class PostDetails {
       required this.images,
       required this.location,
       required this.description,
+
       String? id})
       : id = id ?? const Uuid().v4();
 
@@ -52,6 +53,7 @@ class PostDetails {
 
 class UserPostDetails with ChangeNotifier {
   List<PostDetails> postDetails = [];
+
   Future<void> loadPost() async {
     final PostRemoteSource localSource = PostRemoteSource();
     // final PostLocalSource localSource = PostLocalSource();
@@ -66,11 +68,21 @@ class UserPostDetails with ChangeNotifier {
     await PostRemoteSource().postPost(newPost);
     loadPost();
   }
-  Future<void> remove(String id) async{
-    final PostLocalSource localSource=PostLocalSource();
+
+  Future<void> updatePost(PostDetails updatedPost) async {
+    final PostLocalSource localSource = PostLocalSource();
+    await localSource.update(updatedPost);
+    await PostRemoteSource().updatePost(updatedPost);
+    loadPost();
+
+  }
+
+  Future<void> remove(String id) async {
+    final PostLocalSource localSource = PostLocalSource();
     await localSource.delete(id);
     await PostRemoteSource().remove(id);
 
-   loadPost();
+    loadPost();
   }
+
 }

@@ -14,8 +14,9 @@ import 'location_source.dart';
 import 'map_page.dart';
 
 class AddNewPost extends StatefulWidget {
+  final PostDetails? postDetails;
   const AddNewPost({
-    super.key,
+    super.key, this.postDetails
   });
 
   @override
@@ -23,20 +24,23 @@ class AddNewPost extends StatefulWidget {
 }
 
 class _AddNewPostState extends State<AddNewPost> {
-  final TextEditingController postDescriptionController =
-      TextEditingController();
-  LocationData? _locationData;
-  List<File> imageFileList = [];
-  final ImagePicker imagePicker = ImagePicker();
+  late final TextEditingController postDescriptionController =
+      TextEditingController(text: widget.postDetails?.description);
+  late LocationData? _locationData=widget.postDetails?.location;
+  late List<File> imageFileList = widget.postDetails?.images??[];
+
 
   void selectImages() async {
+    final ImagePicker imagePicker = ImagePicker();
     final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
     print("Image List Length:" + imageFileList.length.toString());
     if (selectedImages != null) {
       setState(() {
+        List<File>selectedImageFile=[];
         for (int i = 0; i < selectedImages.length; i++) {
-          imageFileList.add(File(selectedImages[i].path));
+          selectedImageFile.add(File(selectedImages[i].path));
         }
+        imageFileList=selectedImageFile;
       });
     }
   }
@@ -52,7 +56,7 @@ class _AddNewPostState extends State<AddNewPost> {
 
   void save() async {
     if (imageFileList != null && _locationData != null) {
-      final PostDetails postDetails = PostDetails(
+      final PostDetails postDetails = PostDetails(id: widget.postDetails?.id,
           userId: context.read<UserProfileDetails>().profile!.id,
           images: imageFileList,
           location: LocationData(
@@ -61,7 +65,9 @@ class _AddNewPostState extends State<AddNewPost> {
               longitude: _locationData!.longitude),
           description: postDescriptionController.text);
 
-      await context.read<UserPostDetails>().insertPost(postDetails);
+
+     if(widget.postDetails==null){ await context.read<UserPostDetails>().insertPost(postDetails);} else{
+      await context.read<UserPostDetails>().updatePost(postDetails);}
     }
   }
 
@@ -82,7 +88,7 @@ class _AddNewPostState extends State<AddNewPost> {
           },
           icon: Icon(Icons.arrow_back),
         ),
-        title: Text('Add Post'),
+         title: Text(widget.postDetails==null?'Add Post': 'Update Post')  ,
       ),
       body: ListenableBuilder(
         listenable: context.read<UserProfileDetails>(),
@@ -203,7 +209,7 @@ class _AddNewPostState extends State<AddNewPost> {
               controller: postDescriptionController,
               decoration: InputDecoration(label: Text('Enter descritpion')),
             ),
-            ElevatedButton(onPressed: save, child: Text('+Add post'))
+            ElevatedButton(onPressed: save, child: Text(widget.postDetails==null?'+Add post':'Update Post'))
           ],
         ),
       ),

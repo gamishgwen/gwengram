@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gwengram/add_post_page.dart';
 import 'package:gwengram/custom_carousel.dart';
@@ -6,9 +7,16 @@ import 'package:gwengram/post_details.dart';
 import 'package:gwengram/profile_details.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
 
+
+  const HomePage({super.key, });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,16 +91,24 @@ class HomePage extends StatelessWidget {
                     SizedBox(
                       height: 8,
                     ),
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Carousel(
-                          imageFileList: context
-                              .read<UserPostDetails>()
-                              .postDetails[index]
-                              .images,
+                    GestureDetector(onTap: () async{
+                      await Navigator.of(context).push(MaterialPageRoute(builder:(context) => AddNewPost(postDetails: context
+                          .read<UserPostDetails>()
+                          .postDetails[index],),) );
+                    setState(() {
+
+                    });},
+                      child: Container(
+                        height: 200,
+                        width: double.infinity,
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Carousel(
+                            imageFileList: context
+                                .read<UserPostDetails>()
+                                .postDetails[index]
+                                .images,
+                          ),
                         ),
                       ),
                     ),

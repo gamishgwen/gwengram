@@ -47,6 +47,21 @@ class PostLocalSource{
     return post;
   }
 
+
+  Future<void>update(PostDetails postDetails) async{
+    final posts =await loadPost();
+    final sql.Database db= await  initiatePostDB();
+    final int dbRow = await db.update(_tableName, {
+      'id': postDetails.id,
+      'images': postDetails.images.fold<String>('', (previousValue, element) => '$previousValue,$element'),
+      'lat': postDetails.location.latitude,
+      'lng': postDetails.location.longitude,
+      'address': postDetails.location.address,
+      'description': postDetails.description,
+      'userId': postDetails.userId
+    },where:'id=?',whereArgs: [postDetails.id]);
+  }
+
   Future<void>delete(String id) async{
     print(id);
     final posts =await loadPost();
